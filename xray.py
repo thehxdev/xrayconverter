@@ -130,7 +130,7 @@ class Xray:
                 "id": "UUID", # VMess user UUID
                 "net": self.inbound_network(), # network (tcp, websocket, grpc)
                 "path": "", # TCP or Websocket path
-                "port": self.inbound["port"], # Listen Port
+                "port": self.inbound["port"] if self.inbound["port"] != 10000 else 443, # Listen Port
                 "ps": self.inbound_name, # Config name
                 "scy": "chacha20-poly1305", # cipher
                 "sni": "", # domain name for TLS
