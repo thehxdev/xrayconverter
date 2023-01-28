@@ -1,7 +1,7 @@
 import yaml as y
 import json as j
 import config as conf
-from dirTools.utils import *
+from utils import *
 
 
 class Clash:

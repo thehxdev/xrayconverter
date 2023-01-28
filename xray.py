@@ -1,8 +1,8 @@
 import base64
 import json as j
 import config as conf
-from dirTools.utils import *
-from typing import Generator, Union
+from utils import *
+from typing import Union
 
 
 class Xray:

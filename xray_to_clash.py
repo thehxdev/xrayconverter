@@ -1,16 +1,8 @@
 #!/usr/bin/env python3
 
 import click
-import config as conf
 from clash import Clash
-# from xray import Xray
-from dirTools.utils import *
-
-def init_app():
-    make_dirs(conf.XRAY_CONVERTER_PATH)
-    make_dirs(conf.CLASH_CONFIGS_OUTPUT)
-    make_dirs(conf.XRAY_CONFIGS_OUTPUT)
-
+from utils import *
 
 @click.command()
 @click.option("--toclash",
@@ -27,19 +19,6 @@ def xray_to_clash(toclash: bool,
         clash.write_user_configs()
 
 
-# @click.command()
-# @click.option("--toxray",
-#               is_flag=True,
-#               help="Convert Xray config file to client's link configuration. (All Users)")
-# @click.option("--index",
-#               default=0,
-#               help="Xray's Inbound index")
-# def xray_to_xray(toxray: bool,
-#                  index: int):
-#     pass
-
 if __name__ == "__main__":
     init_app()
     xray_to_clash()
-    # xray_to_xray()
-
