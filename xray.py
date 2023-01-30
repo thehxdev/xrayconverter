@@ -204,7 +204,3 @@ class Xray:
                 f.write(f"{user_conf}\n")
 
 
-x = Xray(domain_name="www.octamocta.xyz")
-
-x.write_all_users_config_to_file()
-

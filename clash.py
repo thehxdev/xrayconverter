@@ -91,6 +91,3 @@ class Clash:
                 y.safe_dump(user_conf, f, indent=2, sort_keys=False)
 
 
-c = Clash(clash_template="/home/hx/template.yaml")
-
-c.write_user_configs()
