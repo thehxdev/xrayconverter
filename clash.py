@@ -1,7 +1,8 @@
 import yaml as y
 import json as j
-import config as conf
+import hashlib
 from utils import *
+import config as conf
 
 
 class Clash:
@@ -53,10 +54,10 @@ class Clash:
         for user in users:
             if xray_protocol == "vmess":
                 # identifiers.append(user["id"])
-                yield user["id"]
+                yield [user["id"], user["email"]]
             elif xray_protocol == "torjan":
                 # identifiers.append(user["password"])
-                yield user["password"]
+                yield [user["password"], user["email"]]
             else:
                 raise RuntimeError(f"Your Xray protocol ({xray_protocol}) is not supported.")
 
@@ -82,10 +83,14 @@ class Clash:
         make_dirs(conf.CLASH_CONFIGS_OUTPUT)
         users = self.extract_users()
 
-        for user in users:
+        for user, email in users:
             user_conf = self.user_template(user)
-            with open(f"{conf.CLASH_CONFIGS_OUTPUT}/{user}.yaml", "w", encoding="utf-8") as f:
+            user_hash = hashlib.sha256(user.encode("utf-8")).hexdigest()[:5]
+            with open(f"{conf.CLASH_CONFIGS_OUTPUT}/{email}_{user_hash}.yaml", "w", encoding="utf-8") as f:
                 f.truncate(0)
                 y.safe_dump(user_conf, f, indent=2, sort_keys=False)
 
 
+c = Clash(clash_template="/home/hx/template.yaml")
+
+c.write_user_configs()

@@ -1,7 +1,8 @@
 import base64
+import hashlib
 import json as j
-import config as conf
 from utils import *
+import config as conf
 from typing import Union
 
 
@@ -106,17 +107,14 @@ class Xray:
         xray_protocol = self.inbound["protocol"]
         users = self.inbound["settings"]["clients"]
 
-        # Xray's `inbound` object can have one protocol type.
-        # So to extract users we don't need to append them to
-        # a new list. Instead, we can return a Generator of users.
         users_id = []
         for user in users:
             if xray_protocol == "vmess" or xray_protocol == "vless":
                 # yield user["id"]
-                users_id.append(user["id"])
+                users_id.append([user["id"], user["email"]])
             elif xray_protocol == "torjan":
                 # yield user["password"]
-                users_id.append(user["password"])
+                users_id.append([user["password"], user["email"]])
             else:
                 raise RuntimeError(f"Your Xray protocol ({xray_protocol}) is not supported.")
         return users_id
@@ -175,22 +173,18 @@ class Xray:
         return f"vmess://{base64_encoded_conf}"
 
 
-    def generate_vmess_link_all_users(self,
-                                      # delete_old:bool = True
-                                      ):
-        users = self.extract_users()
+    def generate_vmess_link_all_users(self):
+        users_with_email = self.extract_users()
+        users = []
         configs = []
+        emails = []
 
-        for user in users:
-            # user_conf = self.generate_vmess_link(user)
-            # with open(f"{conf.XRAY_CONFIGS_OUTPUT}/{user}.txt", "w", encoding="utf-8") as f:
-            #     if delete_old:
-            #         f.truncate(0)
-            #     f.write(f"{user_conf}\n")
-
+        for user, email in users_with_email:
             configs.append(self.generate_vmess_link(user))
+            emails.append(email)
+            users.append(user)
 
-        return zip(users, configs)
+        return zip(users, emails, configs)
 
 
     def make_vless_link_template(self):
@@ -203,9 +197,14 @@ class Xray:
 
     def write_all_users_config_to_file(self):
         configs = self.generate_vmess_link_all_users()
-        for user, user_conf in configs:
-            with open(f"{conf.XRAY_CONFIGS_OUTPUT}/{user}.txt", "w", encoding="utf-8") as f:
+        for user, email, user_conf in configs:
+            user_hash = hashlib.sha256(user.encode("utf-8")).hexdigest()[:5]
+            with open(f"{conf.XRAY_CONFIGS_OUTPUT}/{email}_{user_hash}.txt", "w", encoding="utf-8") as f:
                 f.truncate(0)
                 f.write(f"{user_conf}\n")
 
+
+x = Xray(domain_name="www.octamocta.xyz")
+
+x.write_all_users_config_to_file()
 
