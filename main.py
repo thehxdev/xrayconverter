@@ -16,7 +16,7 @@ async def inbound_users(
         index: int = 0
         ):
     i = Inbounds(inbound_index=index)
-    users_with_emails = zip(i.inbound_users_email(), i.inbound_users())
+    users_with_emails = zip(i.users_email(), i.users())
 
     users = {email:user_id for email, user_id in users_with_emails}
     return users
@@ -28,7 +28,7 @@ async def add_user_to_xray(
         ):
     i = Inbounds(inbound_index=0)
 
-    if username in i.inbound_users_email():
+    if username in i.users_email():
         return {"status": "error", "msg": "user already exists"}
 
     added_user = i.add_user_to_inbound(username)

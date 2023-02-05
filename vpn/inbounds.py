@@ -1,7 +1,7 @@
 import json
 from .xray import Xray
 from .security import Security
-from typing import Optional, Union, Generator
+from typing import Union, Generator
 
 
 class Inbounds(Xray):
@@ -54,7 +54,7 @@ class Inbounds(Xray):
         xray_inbounds = self.data["inbounds"]
         inbounds_info = {}
         for index, inbound in enumerate(xray_inbounds):
-            users_with_emails = zip(self.inbound_users_email(inbound), self.inbound_users(inbound))
+            users_with_emails = zip(self.users_email(inbound), self.users(inbound))
             all_inbound_users = {email:user_id for email, user_id in users_with_emails}
 
             inbound_users_count = len(inbound["settings"]["clients"])
@@ -73,7 +73,7 @@ class Inbounds(Xray):
         return inbounds_info
 
 
-    def inbound_users(
+    def users(
             self,
             selected_inbound: Union[dict, None] = None
             ) -> Generator:
@@ -90,7 +90,7 @@ class Inbounds(Xray):
                 yield user["password"]
 
 
-    def inbound_users_email(
+    def users_email(
             self,
             selected_inbound: Union[dict, None] = None
             ) -> Generator:
@@ -102,35 +102,35 @@ class Inbounds(Xray):
             yield user["email"]
 
 
-    def inbound_websocket_path(self):
+    def websocket_path(self):
         try:
             return self.inbound["streamSettings"]["wsSettings"]["path"]
         except:
             return None
 
 
-    def inbound_websocket_host(self):
+    def websocket_host(self):
         try:
             return self.inbound["streamSettings"]["wsSettings"]["header"]["key"]
         except:
             return None
 
 
-    def inbound_tcp_header_type(self):
+    def tcp_header_type(self):
         try:
             return self.inbound["streamSettings"]["tcpSettings"]["header"]["type"]
         except:
             return None
 
 
-    # def inbound_tcp_header_connection(self):
+    # def tcp_header_connection(self):
     #     try:
     #         return self.inbound["streamSettings"]["tcpSettings"]["header"]["response"]["headers"]["Connection"][0]
     #     except:
     #         return None
 
 
-    def inbound_security(self):
+    def security(self):
         try:
             if self.inbound["streamSettings"]["security"] in self.valid_security:
                 return "tls"
@@ -144,7 +144,7 @@ class Inbounds(Xray):
             self,
             user_id: str
             ) -> bool:
-        return user_id in self.inbound_users()
+        return user_id in self.users()
 
 
     def write_changes_to_xray_config(self) -> None:
@@ -157,7 +157,7 @@ class Inbounds(Xray):
             self,
             user_name: str
             ) -> bool:
-        users_email = self.inbound_users_email()
+        users_email = self.users_email()
         return user_name in users_email
 
 
