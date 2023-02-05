@@ -1,8 +1,6 @@
+import hashlib
 import yaml as y
 import json as j
-import hashlib
-from utils import *
-import config as conf
 
 
 class Clash:
@@ -33,7 +31,6 @@ class Clash:
         # objects. The app will fill `uuid` and `password` objects of yaml
         # file itself with reading and extracting users from Xray's server
         # config.json file.
-
         try:
             with open(self.clash_template, "r", encoding="utf-8") as f:
                 data = y.safe_load(f)
@@ -46,23 +43,17 @@ class Clash:
     def extract_users(self):
         xray_protocol = self.xray_data["inbounds"][0]["protocol"]
         users = self.xray_data["inbounds"][0]["settings"]["clients"]
-        # identifiers = []
 
         # Xray's `inbound` object can have one protocol type.
         # So to extract users we don't need to append them to
         # a new list. Instead, we can return a Generator of users.
         for user in users:
             if xray_protocol == "vmess":
-                # identifiers.append(user["id"])
                 yield [user["id"], user["email"]]
             elif xray_protocol == "torjan":
-                # identifiers.append(user["password"])
                 yield [user["password"], user["email"]]
             else:
                 raise RuntimeError(f"Your Xray protocol ({xray_protocol}) is not supported.")
-
-        # for identifier in identifiers:
-        #     yield identifier
 
 
     def user_template(self, identifier: str) -> dict:
@@ -79,15 +70,19 @@ class Clash:
         return template
 
 
-    def write_user_configs(self) -> None:
-        make_dirs(conf.CLASH_CONFIGS_OUTPUT)
+    def write_user_configs(
+            self,
+            output: str = "/usr/local/"
+            ) -> None:
+        make_dirs(output)
         users = self.extract_users()
 
         for user, email in users:
             user_conf = self.user_template(user)
             user_hash = hashlib.sha256(user.encode("utf-8")).hexdigest()[:5]
-            with open(f"{conf.CLASH_CONFIGS_OUTPUT}/{email}_{user_hash}.yaml", "w", encoding="utf-8") as f:
-                f.truncate(0)
-                y.safe_dump(user_conf, f, indent=2, sort_keys=False)
+            if output:
+                with open(f"{output}/{email}_{user_hash}.yaml", "w", encoding="utf-8") as f:
+                    f.truncate(0)
+                    y.safe_dump(user_conf, f, indent=2, sort_keys=False)
 
 
